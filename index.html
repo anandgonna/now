@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Power of Now</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Import Fonts: Switched Playfair Display to Lora for better legibility -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Lora', 'serif'], // Updated to Lora
+                    },
+                    colors: {
+                        past: { light: '#94a3b8', DEFAULT: '#64748b', dark: '#475569' },
+                        now: { light: '#34d399', DEFAULT: '#10b981', dark: '#059669' },
+                        future: { light: '#a78bfa', DEFAULT: '#8b5cf6', dark: '#7c3aed' },
+                    },
+                    screens: {
+                        'xs': '375px',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,0) 0, hsla(253,16%,7%,0) 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,0) 0, hsla(225,39%,30%,0) 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,0) 0, hsla(339,49%,30%,0) 50%);
+            /* Subtle texture */
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2394a3b8' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            -webkit-tap-highlight-color: transparent; /* Remove blue highlight on tap for mobile */
+        }
+
+        /* Smooth transition for the progress bars */
+        .bar-transition {
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Fade animation for quotes */
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar for data panel */
+        .custom-scroll::-webkit-scrollbar {
+            height: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 text-slate-800 selection:bg-now-light selection:text-white">
+
+    <!-- Main Card -->
+    <div class="bg-white w-full max-w-md rounded-3xl sm:rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] overflow-hidden ring-1 ring-slate-100 relative transition-all duration-300">
+        
+        <!-- Header / Total Display -->
+        <div class="pt-8 pb-6 px-6 sm:pt-12 sm:pb-8 sm:px-8 text-center relative overflow-hidden bg-gradient-to-b from-white to-slate-50/50">
+            <h2 class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-2 sm:mb-4">Mindfulness Tracker</h2>
+            
+            <div class="relative inline-block">
+                <!-- Responsive text size: smaller on mobile, larger on tablet/desktop -->
+                <div class="text-7xl sm:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-slate-700 to-slate-900 drop-shadow-sm scale-100 transition-transform duration-200" id="total-display">0</div>
+            </div>
+            
+            <!-- Quote Section -->
+            <div class="mt-6 sm:mt-8 min-h-[60px] sm:min-h-[80px] flex items-center justify-center relative group">
+                
+                <div class="relative w-full px-8 sm:px-12 flex flex-col items-center justify-center">
+                    <p id="quote-display" class="text-slate-600 font-serif text-base sm:text-lg leading-relaxed transition-opacity duration-300 relative z-10 cursor-pointer select-none" onclick="showRandomQuote()">
+                        “Realize deeply that the present moment is all you have.”
+                    </p>
+                    <p class="text-slate-400 text-xs sm:text-sm font-medium mt-3 fade-in font-sans tracking-wide">— Eckhart Tolle</p>
+                    
+                    <!-- Refresh Button -->
+                    <button onclick="showRandomQuote()" class="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-slate-300 hover:text-now-DEFAULT hover:bg-slate-50 rounded-full transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100" title="New Quote">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Section -->
+        <div class="p-6 sm:p-8 bg-white">
+            
+            <!-- Buttons Grid -->
+            <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-10">
+                <!-- Past Button -->
+                <!-- Responsive height: h-24 on mobile, h-32 on desktop -->
+                <button onclick="addCount('past')" 
+                    class="group relative flex flex-col items-center justify-center p-2 sm:p-4 h-24 sm:h-32 rounded-2xl bg-slate-50 border border-slate-100 transition-all duration-200 hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-1 active:scale-95 active:shadow-inner touch-manipulation">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white shadow-sm ring-1 ring-slate-100 text-slate-400 group-hover:text-past group-hover:ring-past-light/30 transition-all duration-300 flex items-center justify-center mb-2 sm:mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
+                        </svg>
+                    </div>
+                    <span class="font-semibold text-slate-500 text-[10px] sm:text-xs uppercase tracking-wide group-hover:text-past-dark transition-colors">Past</span>
+                    <div class="absolute inset-x-0 bottom-0 h-1 bg-past rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
+
+                <!-- Now Button -->
+                <button onclick="addCount('now')" 
+                    class="group relative flex flex-col items-center justify-center p-2 sm:p-4 h-24 sm:h-32 rounded-2xl bg-emerald-50/30 border border-emerald-100/50 transition-all duration-200 hover:bg-white hover:shadow-lg hover:shadow-emerald-200/40 hover:-translate-y-1 active:scale-95 active:shadow-inner touch-manipulation">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white shadow-md ring-1 ring-emerald-100 text-emerald-400 group-hover:text-now group-hover:ring-now-light/30 transition-all duration-300 flex items-center justify-center mb-2 sm:mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </div>
+                    <span class="font-bold text-emerald-600/80 text-[10px] sm:text-xs uppercase tracking-wide group-hover:text-now-dark transition-colors">Now</span>
+                    <div class="absolute inset-x-0 bottom-0 h-1 bg-now rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
+
+                <!-- Future Button -->
+                <button onclick="addCount('future')" 
+                    class="group relative flex flex-col items-center justify-center p-2 sm:p-4 h-24 sm:h-32 rounded-2xl bg-slate-50 border border-slate-100 transition-all duration-200 hover:bg-white hover:shadow-lg hover:shadow-violet-200/50 hover:-translate-y-1 active:scale-95 active:shadow-inner touch-manipulation">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white shadow-sm ring-1 ring-slate-100 text-slate-400 group-hover:text-future group-hover:ring-future-light/30 transition-all duration-300 flex items-center justify-center mb-2 sm:mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                        </svg>
+                    </div>
+                    <span class="font-semibold text-slate-500 text-[10px] sm:text-xs uppercase tracking-wide group-hover:text-future-dark transition-colors">Future</span>
+                    <div class="absolute inset-x-0 bottom-0 h-1 bg-future rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
+            </div>
+
+            <!-- Stats List -->
+            <div class="space-y-5 sm:space-y-6 px-1">
+                
+                <!-- Past Stat -->
+                <div class="group">
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider group-hover:text-past transition-colors">Past <span class="text-[10px] font-normal lowercase opacity-70 ml-1 block sm:inline">non-forgiveness</span></span>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-sm font-bold text-slate-700 tabular-nums" id="count-past">0</span>
+                            <span class="text-xs font-medium text-slate-400 tabular-nums" id="pct-past">0%</span>
+                        </div>
+                    </div>
+                    <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden ring-1 ring-slate-50">
+                        <div id="bar-past" class="h-full bg-past bar-transition shadow-[0_0_10px_rgba(100,116,139,0.4)]" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Now Stat -->
+                <div class="group">
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-xs font-bold text-emerald-600/70 uppercase tracking-wider group-hover:text-now transition-colors">Now <span class="text-[10px] font-normal lowercase opacity-70 ml-1 text-emerald-500 block sm:inline">presence</span></span>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-sm font-bold text-slate-800 tabular-nums" id="count-now">0</span>
+                            <span class="text-xs font-medium text-emerald-500 tabular-nums" id="pct-now">0%</span>
+                        </div>
+                    </div>
+                    <div class="h-3 w-full bg-emerald-50 rounded-full overflow-hidden ring-1 ring-emerald-100/50">
+                        <div id="bar-now" class="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 bar-transition shadow-[0_0_12px_rgba(16,185,129,0.4)]" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Future Stat -->
+                <div class="group">
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider group-hover:text-future transition-colors">Future <span class="text-[10px] font-normal lowercase opacity-70 ml-1 block sm:inline">fear/anxiety</span></span>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-sm font-bold text-slate-700 tabular-nums" id="count-future">0</span>
+                            <span class="text-xs font-medium text-slate-400 tabular-nums" id="pct-future">0%</span>
+                        </div>
+                    </div>
+                    <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden ring-1 ring-slate-50">
+                        <div id="bar-future" class="h-full bg-future bar-transition shadow-[0_0_10px_rgba(139,92,246,0.4)]" style="width: 0%"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Data Management Section -->
+            <div class="mt-10 sm:mt-12 pt-6 border-t border-dashed border-slate-200">
+                <div class="flex justify-center gap-6 text-xs font-medium text-slate-400">
+                    <button onclick="toggleDataPanel()" class="hover:text-slate-600 transition-colors flex items-center gap-1.5 py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                        </svg>
+                        Backup / Restore
+                    </button>
+                    <button onclick="resetCounts()" id="reset-btn" class="hover:text-red-500 transition-colors flex items-center gap-1.5 py-2 group">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 group-hover:rotate-180 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Reset All
+                    </button>
+                </div>
+
+                <!-- Hidden Data Panel -->
+                <div id="data-panel" class="hidden mt-6 bg-slate-50/80 backdrop-blur-sm p-4 sm:p-5 rounded-xl border border-slate-100 shadow-inner">
+                    <p class="text-[10px] uppercase tracking-wide font-bold text-slate-400 mb-3 text-center">Sync Across Devices</p>
+                    
+                    <div class="space-y-3">
+                        <div class="relative">
+                             <label class="block text-[10px] text-slate-400 mb-1 ml-1">Your Data Code</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="data-string" readonly class="w-full text-xs p-2.5 rounded-lg border border-slate-200 font-mono text-slate-600 bg-white focus:outline-none focus:ring-2 focus:ring-now-light/50" placeholder="Empty...">
+                                <button onclick="copyData()" class="bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 text-xs px-3 sm:px-4 rounded-lg font-semibold transition-colors shadow-sm whitespace-nowrap">Copy</button>
+                            </div>
+                        </div>
+
+                        <div class="relative">
+                            <label class="block text-[10px] text-slate-400 mb-1 ml-1">Import Code</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="import-string" class="w-full text-xs p-2.5 rounded-lg border border-slate-200 font-mono text-slate-600 bg-white focus:outline-none focus:ring-2 focus:ring-blue-100" placeholder="Paste code here...">
+                                <button onclick="importData()" class="bg-slate-800 hover:bg-slate-700 text-white text-xs px-3 sm:px-4 rounded-lg font-semibold transition-colors shadow-sm whitespace-nowrap">Load</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+<script>
+    // --- Configuration ---
+    const STORAGE_KEY = 'mindfulness_counter_state_v1';
+    
+    // --- State Management ---
+    let state = {
+        past: 0,
+        now: 0,
+        future: 0
+    };
+
+    const quotes = [
+        "Realize deeply that the present moment is all you have.",
+        "The past has no power over the present moment.",
+        "Unease, anxiety, tension, stress, worry — all forms of fear — are caused by too much future, and not enough presence.",
+        "Guilt, regret, resentment, grievances, sadness, bitterness, and all forms of nonforgiveness are caused by too much past, and not enough presence.",
+        "Wherever you are, be there totally.",
+        "You are not your mind.",
+        "To realize that you are not your thoughts is when you begin to awaken spiritually.",
+        "The primary cause of unhappiness is never the situation but your thoughts about it.",
+        "Accept — then act. Whatever the present moment contains, accept it as if you had chosen it.",
+        "Nothing has ever happened in the past; it happened in the Now.",
+        "Nothing will ever happen in the future; it will happen in the Now.",
+        "The pain-body wants to survive, just like every other entity in existence, and it can only survive if it gets you to unconsciously identify with it.",
+        "If you are not living this moment, you are not really living.",
+        "Die to the past every moment. You don’t need it.",
+        "Worry pretends to be necessary but serves no useful purpose.",
+        "Life is the dancer and you are the dance.",
+        "Focus your attention on the feeling inside you. Know that it is the pain-body. Accept that it is there.",
+        "The moment that judgment stops through acceptance of what is, you are free of the mind.",
+        "You cannot find yourself by going into the past. You can find yourself by coming into the present.",
+        "All true artists, whether they know it or not, create from a place of no-mind, from inner stillness.",
+        "To offer no resistance to life is to be in a state of grace, ease, and lightness.",
+        "Don’t seek happiness. If you seek it, you won’t find it, because seeking is the antithesis of happiness.",
+        "Power over others is weakness disguised as strength.",
+        "Any action is often better than no action, especially if you have been stuck in an unhappy situation for a long time.",
+        "Is there joy, ease, and lightness in what I am doing?",
+        "You are the universe expressing itself as a human for a little while.",
+        "Can you look without the voice in your head commenting, drawing conclusions, comparing, or trying to figure something out?",
+        "Boredom is the mind's hunger for new stimuli.",
+        "Be the silent watcher of your thoughts and behavior.",
+        "Observe the thought, feel the emotion, observe the reaction. Don’t judge it.",
+        "The past giving you an identity and the future holding the promise of salvation are illusions.",
+        "Love is a state of Being. Your love is not outside; it is deep within you.",
+        "Acknowledging the good that you already have in your life is the foundation for all abundance.",
+        "Sometimes letting things go is an act of far greater power than defending or hanging on.",
+        "The ego is not who you really are.",
+        "Prejudice of any kind implies that you are identified with the thinking mind.",
+        "When you complain, you make yourself into a victim.",
+        "Leave the situation, change it, or accept it. All else is madness.",
+        "See if you can catch yourself complaining, in either speech or thought, about a situation you find yourself in.",
+        "The eternal present is the space within which your whole life unfolds.",
+        "Watch the thinker.",
+        "Non-reaction to the ego in others is one of the most effective ways of going beyond the ego in yourself.",
+        "Space and silence are two aspects of the same thing, the same nothing.",
+        "True salvation is freedom from negativity, and above all from past and future as a psychological need.",
+        "You are here to enable the divine purpose of the universe to unfold. That is how important you are!",
+        "Embrace the present moment as a friend, not an enemy.",
+        "Stress is caused by being 'here' but wanting to be 'there'.",
+        "Your outer journey may contain a million steps; your inner journey only has one: the step you are taking right now.",
+        "Whatever you fight, you strengthen, and what you resist, persists.",
+        "Listen to the silence inside the sound.",
+        "The more you are focused on time—past and future—the more you miss the Now, the most precious thing there is.",
+        "Surrender is the simple but profound wisdom of yielding to rather than opposing the flow of life.",
+        "You are the sky. The clouds are what happens, what comes and goes.",
+        "The beginning of freedom is the realization that you are not the possessing entity — the thinker.",
+        "Ask yourself: Is there joy, ease and lightness in what I am doing? If not, then time is covering the present moment.",
+        "The past survives in you as memory, but memory is not reality."
+    ];
+
+    // --- Core Logic ---
+
+    // Load from LocalStorage on startup
+    function init() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                state = JSON.parse(saved);
+            } catch (e) {
+                console.error("Could not load saved state", e);
+            }
+        }
+        updateUI(false); // Update UI without animating total
+        showRandomQuote(); // Randomize quote on load
+    }
+
+    function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function addCount(type) {
+        state[type]++;
+        saveState();
+        updateUI(true); // Animate
+        showRandomQuote();
+    }
+
+    function resetCounts() {
+        if(confirm("Are you sure you want to reset all counters? This cannot be undone.")) {
+            state = { past: 0, now: 0, future: 0 };
+            saveState();
+            updateUI(true);
+        }
+    }
+
+    // --- UI Updates ---
+
+    let lastQuoteIndex = -1;
+
+    function showRandomQuote() {
+        const quoteEl = document.getElementById('quote-display');
+        
+        // Ensure we don't pick the same quote twice in a row
+        let newIndex;
+        do {
+            newIndex = Math.floor(Math.random() * quotes.length);
+        } while (newIndex === lastQuoteIndex && quotes.length > 1);
+        
+        lastQuoteIndex = newIndex;
+        const randomQuote = quotes[newIndex];
+        
+        quoteEl.classList.remove('fade-in');
+        void quoteEl.offsetWidth; 
+        quoteEl.innerText = `“${randomQuote}”`; 
+        quoteEl.classList.add('fade-in');
+    }
+
+    function updateUI(animate) {
+        const total = state.past + state.now + state.future;
+        const totalEl = document.getElementById('total-display');
+        
+        totalEl.innerText = total;
+
+        if (animate) {
+            totalEl.classList.add('scale-110');
+            setTimeout(() => totalEl.classList.remove('scale-110'), 150);
+        }
+
+        updateRow('past', total);
+        updateRow('now', total);
+        updateRow('future', total);
+        
+        // Update Export String
+        updateExportString();
+    }
+
+    function updateRow(type, total) {
+        let pct = 0;
+        if (total > 0) {
+            pct = (state[type] / total) * 100;
+        }
+        document.getElementById(`count-${type}`).innerText = state[type];
+        
+        let pctString = Math.round(pct) + '%';
+        if (total > 0 && pct > 0 && pct < 1) pctString = '<1%';
+        document.getElementById(`pct-${type}`).innerText = pctString;
+        document.getElementById(`bar-${type}`).style.width = `${pct}%`;
+    }
+
+    // --- Sync / Backup Logic ---
+
+    function toggleDataPanel() {
+        const panel = document.getElementById('data-panel');
+        panel.classList.toggle('hidden');
+    }
+
+    function updateExportString() {
+        // Simple Base64 encoding to make the string look cleaner (not encryption!)
+        const json = JSON.stringify(state);
+        const encoded = btoa(json);
+        document.getElementById('data-string').value = encoded;
+    }
+
+    function copyData() {
+        const copyText = document.getElementById("data-string");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); 
+        document.execCommand('copy');
+        
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.innerText = "Copied!";
+        btn.classList.add('bg-green-50', 'text-green-600', 'border-green-200');
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.classList.remove('bg-green-50', 'text-green-600', 'border-green-200');
+        }, 2000);
+    }
+
+    function importData() {
+        const input = document.getElementById('import-string').value.trim();
+        if (!input) return;
+
+        try {
+            const decoded = atob(input);
+            const newState = JSON.parse(decoded);
+            
+            if (typeof newState.past === 'number' && 
+                typeof newState.now === 'number' && 
+                typeof newState.future === 'number') {
+                
+                if(confirm("This will overwrite your current counts with the imported data. Continue?")) {
+                    state = newState;
+                    saveState();
+                    updateUI(true);
+                    document.getElementById('import-string').value = '';
+                    alert("Data imported successfully!");
+                    toggleDataPanel();
+                }
+            } else {
+                throw new Error("Invalid data structure");
+            }
+        } catch (e) {
+            alert("Invalid data string. Please check the code and try again.");
+        }
+    }
+
+    // Initialize on load
+    init();
+
+</script>
+</body>
+</html>
